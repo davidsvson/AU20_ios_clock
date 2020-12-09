@@ -11,35 +11,50 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var timeLabel: UILabel!
 
-    let formatter = DateFormatter()
     var timer : Timer?
+    var lastTime : Date?
+    var running = false
+    var timeRemaining = 60.0
     
     override func viewDidLoad() {
         super.viewDidLoad()
     
-        formatter.timeStyle = .medium
-        
-        updateTimeLabel()
-        
-        timer = Timer.scheduledTimer(withTimeInterval: 0.5 , repeats: true, block: updateTimeLabel(timer:) )
+        setTimeLabel()
     }
     
-    func updateTimeLabel(timer: Timer? = nil) {
-        let date = Date()
-        let timeString = formatter.string(from: date)
-        timeLabel.text = timeString
+    @IBAction func startStop(_ sender: Any) {
+        running = !running
+    
+        if running {
+            lastTime = Date()
+            
+            updateTime()
+            timer = Timer.scheduledTimer(withTimeInterval: 0.05 , repeats: true, block: updateTime(timer:) )
+        } else {
+            updateTime()
+            timer?.invalidate()
+        }
+    }
+    
+    func updateTime(timer: Timer? = nil) {
+        let now = Date()
+        
+        if let lastTime = lastTime {
+            let diff = now.timeIntervalSince(lastTime)
+            
+            timeRemaining -= diff
+            
+            setTimeLabel()
+        }
+        lastTime = now
+    }
+    
+    func setTimeLabel() {
+        timeLabel.text = String(format: "%.1f", timeRemaining)
     }
     
     deinit {
-       
-//        if let timer = timer {
-//            timer.invalidate()
-//        }
-        
         timer?.invalidate()
     }
-    
-
-
 }
 
